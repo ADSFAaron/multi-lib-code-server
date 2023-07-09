@@ -2,6 +2,8 @@
 
 期望可以解決不同電腦造成的複雜的安裝環境，且可以在任何瀏覽器中運行 [VS Code](https://github.com/Microsoft/vscode)
 
+感謝 [works-on-my-machine](https://github.com/works-on-my-machine/pytorch-code-server)，讓我有個好的 base image 可以做修改
+
 Dockerfile 包含下列套件：
 
 - CUDA 11.6.2
@@ -17,12 +19,19 @@ Dockerfile 包含下列套件：
 
 ### Windows
 
-- Windows 使用者，請安裝下列驅動和應用程式
+- CUDA 裝置且有計算能力 (compute capability) 高於 3.5
+- 根據自身主機規格，安裝下列驅動和應用程式
   - [WSL2](https://learn.microsoft.com/zh-tw/windows/wsl/install)
   - [Nvidia 顯示卡驅動](https://www.nvidia.com/download/index.aspx)
   - [Docker](https://www.docker.com/)
 - 可使用 `nvidia-smi` 檢查 Nvidia 顯示卡驅動是否成功安裝和辨識
 - Docker 安裝完成後，可使用 Powershell/Ubuntu 測試 `docker info` 是否有成功顯示 Docker 資訊
+- 要有 CUDA 支援要有 NVIDIA 顯示卡阿~
+
+### Linux
+
+- CUDA 裝置且有計算能力 (compute capability) 高於 3.5，可至 [NVIDIA-CUDA-GPUS](https://developer.nvidia.com/cuda-gpus) 參考
+- [NVIDIA Docker Toolkit](https://github.com/ghokun/nvidia-docker-host)
 
 ## Docker image link
 
@@ -115,11 +124,35 @@ docker attach <your_container_id> /bin/bash
 cat ~/.config/code-server/config.yaml
 ```
 
+若要跳出 Container，可以使用 `CTRL-p CTRL-q`，詳細指令請參考 [DockerAttach](https://docs.docker.com/engine/reference/commandline/attach/)
+
 - `--volume`, `-v` : Container 與本機資料夾連線，可傳輸檔案
   - `本機路徑 : Container 路徑`
   - 可套用多個路徑連接 e.g. 連接 vscode config 檔案
+  
+  ```powershell
+  -v ${PWD}/config:/home/coder/.config
+  ```
+
 - `--ipc` : 可參考 [philipzheng](https://philipzheng.gitbook.io/docker_practice/underly/namespace) 所撰寫的詳細內容
 - `--user` : 使用者的權限，僅在 linux 上才有，可參考 [askubuntu](https://askubuntu.com/questions/645236/command-to-list-all-users-with-their-uid)，預設使用者是 1000，因此 Windows 上直接指定值，避免出錯
+- `--gpus=all` : 表示 Container 可以調用到所有的顯示卡，若要指定特定的顯卡，可以使用下方指令尋找
+  
+  ```bash
+  nvidia-smi --query-gpu=uuid --format=csv
+  ```
+
+  查詢後，在 docker run GPU 欄位修改如下
+
+  ```bash
+  --gpus "device=GPU-<uuid>"
+  ```
+
+  或是使用 (在我的 WSL2 環境下，底下這個指令沒有作用)
+
+  ```bash
+  --gpus device=0
+  ```
 
 ## Encrypted Code Server
 
@@ -128,21 +161,21 @@ cat ~/.config/code-server/config.yaml
 1. 使用 Reverse Proxy
 2. 修改 `Dockerfile`，在檔案的最後 `ENTRYPOINT` 需加上 `"--cert"`，並且在 `entrypoint.sh` 中增加 volume 連接，
 
-因為這個 Code server 主要是多人使用，因此選擇 Reverse Proxy 來實作
+因為我的 Code server 主要是多人使用，因此選擇 Reverse Proxy 來實作
 > 這方法不會是最快、耗最少資源的方式，但比較簡易操作
 
-1. 至 DockerHub 下載 [DockerHub](https://hub.docker.com/r/jc21/nginx-proxy-manager)
-2. 啟用 Nginx Proxy Manager，若要使用 dockerfile 啟動，可參考 [NginxProxyManager](https://github.com/NginxProxyManager/nginx-proxy-manager)
+1. 至 DockerHub 下載 [nginx-proxy-manager](https://hub.docker.com/r/jc21/nginx-proxy-manager)
+2. 啟用 Nginx Proxy Manager，若要使用 dockerfile 啟動，可參考 [NginxProxyManager]
 3. 進入 `localhost:81` 登入帳號密碼
 4. 在 Menu 選單中，點擊 `SSL Certificates`，點擊 `Add SSL Certificate`，並選擇 Let's Encrypt
-5. Domain Names 填寫申請的網址位置，可透過 Godaddy、Cloudflare 等多種營運商，可自行選擇其一，接著點擊 Save
+5. Domain Names 填寫申請的網址位置，可透過 Godaddy、Cloudflare 等多種營運商購買，或使用免費的 Duckdns、Freenom ，可自行選擇其一，設定好 domain name 轉 ip address，接著點擊 Save
 6. 經過一段時間後，驗證完成，即可以使用憑證
 7. 在 Menu 選單中，進入 `Host` > `Proxy Hosts`，點擊 `Add Proxy Host`
 8. `Domain Names` 填入剛剛申請的網址
    1. `Scheme` 選擇 http
    2. `Forward Hostname / IP` 填入自己電腦的 ip，或是在雲端運算的 ip 位置 (e.g. 127.0.0.1，localhost 填入會無法解析)
    3. `Forward Port` 選擇電腦送出的 port
-   4. `Web Socket Supports` 在 VS Code Server 需打開，否則登入畫面會呈現空白
+   4. `Web Socket Supports` 在 VS Code Server 需開啟，否則登入畫面會呈現空白
 9. 選擇 `SSL`，`SSL Certificate`，選擇在 6. 取得的網頁憑證，`Force SSL` `HTTP/2 Support` 需開啟
 10. 點擊 Save，透過網址輸入即可看到 VS Code 登入畫面
 
@@ -155,9 +188,11 @@ cat ~/.config/code-server/config.yaml
 - [ ] 完善 dockerfile 配置使用說明
 - [ ] 說明 docker run 流程
 - [ ] noVNC support 理解
+- [ ] 使用指令預設安裝 VSCode 套件
 
 ## Reference
 
 - [WSL-config](https://learn.microsoft.com/zh-tw/windows/wsl/wsl-config)
 - [pytorch-code-server](https://github.com/works-on-my-machine/pytorch-code-server)
 - [NVIDIA-CUDA](https://hub.docker.com/r/nvidia/cuda)
+- [NginxProxyManager](https://github.com/NginxProxyManager/nginx-proxy-manager)
