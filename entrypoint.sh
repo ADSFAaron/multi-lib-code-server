@@ -17,4 +17,20 @@ if [ "${DOCKER_USER-}" ] && [ "$DOCKER_USER" != "$USER" ]; then
   sudo sed -i "/coder/d" /etc/sudoers.d/nopasswd
 fi
 
+EXTENSIONS="${EXTENSIONS:-none}"
+
+if [ ${EXTENSIONS} != "none" ]
+    then
+      echo "Installing Extensions"
+      for extension in $(echo ${EXTENSIONS} | tr "," "\n")
+        do
+          if [ "${extension}" != "" ]
+            then
+              dumb-init /usr/bin/code-server \
+                --install-extension "${extension}" \
+                /home/coder
+	        fi
+        done
+fi
+
 dumb-init /usr/bin/code-server "$@"

@@ -24,6 +24,10 @@ RUN apt-get update --fix-missing && DEBIAN_FRONTEND=noninteractive apt-get insta
   python \
   python3-pip \
   python3-opencv \
+  build-essential \
+  g++ \
+  apache2-utils \
+  tree \
   && rm -rf /var/lib/apt/lists/*
 
 RUN sed -i "s/# zh_TW.UTF-8/zh_TW.UTF-8/" /etc/locale.gen \
@@ -63,7 +67,7 @@ RUN echo "coder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-coder
 
 # Install fixuid with permission error
 ENV ARCH=amd64
-RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
+RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixuid-0.6.0-linux-$ARCH.tar.gz" | tar -C /usr/local/bin -xzf - && \
   chown root:root /usr/local/bin/fixuid && \
   chmod 4755 /usr/local/bin/fixuid && \
   mkdir -p /etc/fixuid && \
@@ -71,7 +75,7 @@ RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixui
 
 # Install code-server
 WORKDIR /tmp
-ENV CODE_SERVER_VERSION=4.14.1
+ENV CODE_SERVER_VERSION=4.17.1
 RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 RUN dpkg -i ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb && rm ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh

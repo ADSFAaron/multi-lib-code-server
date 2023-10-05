@@ -13,7 +13,8 @@ Dockerfile 包含下列套件：
 - PyTorch 1.13.0+cu116
 - torchdata==0.6.1, torchtext==0.15.2, ...
 - Tensorflow-gpu 2.10.1
-- Code Server 4.14.1 (VS Code v1.79.2)
+- Code Server 4.17.1 (VS Code v1.82.2)
+- 等等等等等
 
 ## Requirements
 
@@ -84,6 +85,7 @@ docker run --privileged -d --init `
   --volume="${PWD}:/projects" `
   -p 8888:8443 `
   -e PASSWORD='password' `
+  -e EXTENSIONS="ms-python.vscode-pylance,tushortz.python-extended-snippets,andyyaldoo.vscode-json,vscode-icons-team.vscode-icons" `
   adsfaaron/vscode-server-gpu:11.6.2
 ```
 
@@ -100,6 +102,7 @@ docker run --privileged --rm -it --init \
   --volume="$PWD:/projects" \
   -p 8888:8443 \ 
   -e PASSWORD='password' \
+  -e EXTENSIONS="ms-python.vscode-pylance,tushortz.python-extended-snippets,andyyaldoo.vscode-json,vscode-icons-team.vscode-icons" \
   adsfaaron/vscode-server-gpu:11.6.2
 ```
 
@@ -110,7 +113,11 @@ docker run --privileged --rm -it --init \
 - `--restart always` : Container 意外中斷後，會持續進行重新啟動
 - `--cpus="4"` : 設定最多可調用 4 個邏輯處理器核心到 Container
 - `--dns 8.8.8.8` : 設定 Container 的 DNS，是因為小弟我的主機預設的 DNS 有時很不穩，沒有一定要加拉 〒▽〒
+- `-p 8888:8443` : 表示建立的 container 目前 8443 port 將與主機的 8888 port 連接。
+  - 舉例來說，目前主機想要一個對外的 port 是 1234，則需修改為 `-p 1234:8443`
+  - ⚠️ 在 Windows Server 中，須至防火牆設定對外連接阜，否則在 wsl 設定的 port 在外也連不到，可參考 [Bridge-WslPorts](/Bridge-WslPorts.ps1) 解決此問題
 - `-e PASSWORD` : 設定 VSCode 進入頁面前的密碼，建議設定較高難度的密碼。若沒有設定，需另開一個 Container 的 Terminal 進入 `~/.config/code-server/config.yaml` 中尋找密碼
+- `-e EXTENSIONS` : 預先安裝 Code-server 中的套件，方便使用者進入後即可快速使用。更多的使用者套件，請至 [Open-vsx](https://open-vsx.org/) 查詢，並且記錄套件頁面的 Bundled Extensions。多個套件使用 `,` 進行分隔
 
 ```bash
 docker exec -it <your_container_name> /bin/bash
@@ -129,6 +136,7 @@ cat ~/.config/code-server/config.yaml
 - `--volume`, `-v` : Container 與本機資料夾連線，可傳輸檔案
   - `本機路徑 : Container 路徑`
   - 可套用多個路徑連接 e.g. 連接 vscode config 檔案
+  - `${PWD}` : 表示為目前路徑
   
   ```powershell
   -v ${PWD}/config:/home/coder/.config
@@ -166,7 +174,7 @@ cat ~/.config/code-server/config.yaml
 
 1. 至 DockerHub 下載 [nginx-proxy-manager](https://hub.docker.com/r/jc21/nginx-proxy-manager)
 2. 啟用 Nginx Proxy Manager，若要使用 dockerfile 啟動，可參考 [NginxProxyManager]
-3. 進入 `localhost:81` 登入帳號密碼
+3. 進入 `localhost:81` 或是  `127.0.0.1:81` 登入帳號密碼
 4. 在 Menu 選單中，點擊 `SSL Certificates`，點擊 `Add SSL Certificate`，並選擇 Let's Encrypt
 5. Domain Names 填寫申請的網址位置，可透過 Godaddy、Cloudflare 等多種營運商購買，或使用免費的 Duckdns、Freenom ，可自行選擇其一，設定好 domain name 轉 ip address，接著點擊 Save
 6. 經過一段時間後，驗證完成，即可以使用憑證
@@ -179,16 +187,34 @@ cat ~/.config/code-server/config.yaml
 9. 選擇 `SSL`，`SSL Certificate`，選擇在 6. 取得的網頁憑證，`Force SSL` `HTTP/2 Support` 需開啟
 10. 點擊 Save，透過網址輸入即可看到 VS Code 登入畫面
 
+## How to rebuild this image
+
+1. 切換路徑至目前 Folder 下
+2. `docker build -t vscode-server-gpu:11.6.2 .`
+
+🔣 指令說明
+
+- `-t(--tag) vscode-server-gpu:11.6.2` : 標籤 image 名字
+- `.` : 表示為根據目前的目錄建置，若有特別的路徑 可在此設置
+- 更多詳細內容，可參考 [Docker build](https://docs.docker.com/engine/reference/commandline/build/)
+
+⚠️ 建議 build 時是在 linux 環境下，windows 容易在設置使用者權限時出錯
+
+## Limitation
+
+- 在 vscode-server 中無法再使用 ssh 連線至其他主機
+
 ## Notes
 
-- HTTPS 僅可在輸入網址時可使用，若要在 ip 上使用 HTTPS (如 <https://192.168.0.1>)，將無法使用，僅可使用 http 連入
+- 在 reversed proxy 時，HTTPS 僅可在輸入網址時可使用，若要在 ip 上使用 HTTPS (如 <https://192.168.0.1>)，會使用 http 連入
 
 ## TODO
 
-- [ ] 完善 dockerfile 配置使用說明
-- [ ] 說明 docker run 流程
-- [ ] noVNC support 理解
-- [ ] 使用指令預設安裝 VSCode 套件
+- [x] 完善 dockerfile 配置使用說明
+- [x] 使用指令預設安裝 VSCode 套件
+- [ ] 增加 readme 圖片
+- [ ] 說明 dockerfile / entrypoint.sh
+
 
 ## Reference
 
