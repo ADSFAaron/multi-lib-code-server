@@ -1,5 +1,7 @@
 # Multi-Lib Code Server with CUDA
 
+[🌎 English Readme](/README.md)
+
 期望可以解決不同電腦造成的複雜的安裝環境，且可以在任何瀏覽器中運行 [VS Code](https://github.com/Microsoft/vscode)
 
 感謝 [works-on-my-machine](https://github.com/works-on-my-machine/pytorch-code-server)，讓我有個好的 base image 可以做修改
@@ -214,7 +216,6 @@ cat ~/.config/code-server/config.yaml
 - [x] 使用指令預設安裝 VSCode 套件
 - [ ] 增加 readme 圖片
 - [ ] 說明 dockerfile / entrypoint.sh
-
 
 ## Reference
 
