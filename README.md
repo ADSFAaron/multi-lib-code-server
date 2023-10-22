@@ -15,7 +15,7 @@ The Dockerfile includes the following packages:
 - PyTorch 1.13.0+cu116
 - torchdata==0.6.1, torchtext==0.15.2, ...
 - Tensorflow-gpu 2.10.1
-- Code Server 4.17.1 (VS Code v1.82.2)
+- Code Server 4.18.0 (VS Code v1.83.1)
 
 ## Requirements
 

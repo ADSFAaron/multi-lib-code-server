@@ -15,7 +15,7 @@ Dockerfile 包含下列套件：
 - PyTorch 1.13.0+cu116
 - torchdata==0.6.1, torchtext==0.15.2, ...
 - Tensorflow-gpu 2.10.1
-- Code Server 4.17.1 (VS Code v1.82.2)
+- Code Server 4.18.0 (VS Code v1.83.1)
 - 等等等等等
 
 ## Requirements
@@ -35,6 +35,8 @@ Dockerfile 包含下列套件：
 
 - CUDA 裝置且有計算能力 (compute capability) 高於 3.5，可至 [NVIDIA-CUDA-GPUS](https://developer.nvidia.com/cuda-gpus) 參考
 - [NVIDIA Docker Toolkit](https://github.com/ghokun/nvidia-docker-host)
+- Linux 環境下須安裝 NVIDIA Container Toolkit，確保 Docker 可以調用 GPU 資源。
+  - [安裝 NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 
 ## Docker image link
 
