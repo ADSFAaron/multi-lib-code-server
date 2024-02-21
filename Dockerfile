@@ -58,6 +58,9 @@ RUN pip install --no-cache-dir opencv-contrib-python opencv-python opencv-python
     imageio imageio-ffmpeg \
     virtualenv flask protobuf==3.19.6
 
+RUN pip install --no-cache-dir yfinance zipp zict tokenizers scooby PyDrive2 huggingface-hub diskcache \
+    transformers 
+
 RUN pip install --no-cache-dir --upgrade nvitop
 
 # Create a non-root user
@@ -75,10 +78,16 @@ RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixui
 
 # Install code-server
 WORKDIR /tmp
-ENV CODE_SERVER_VERSION=4.18.0
+ARG CODE_SERVER_VERSION=latest
+ENV CODE_SERVER_VERSION=${CODE_SERVER_VERSION}
+# 使用 ENV 設定的版本來安裝 code-server
+# ENV CODE_SERVER_VERSION=4.20.0
 RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 RUN dpkg -i ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb && rm ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+
+# Cleanup to make the image smaller
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* ~/.cache /var/cache
 
 # Switch to default user
 USER coder

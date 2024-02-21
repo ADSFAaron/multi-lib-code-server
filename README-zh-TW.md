@@ -15,7 +15,7 @@ Dockerfile 包含下列套件：
 - PyTorch 1.13.0+cu116
 - torchdata==0.6.1, torchtext==0.15.2, ...
 - Tensorflow-gpu 2.10.1
-- Code Server 4.18.0 (VS Code v1.83.1)
+- Code Server 4.19.0 (VS Code v1.84.2)
 - 等等等等等
 
 ## Requirements
