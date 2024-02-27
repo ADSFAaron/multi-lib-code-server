@@ -38,6 +38,7 @@ jobs:
             # 更新 GitHub Secrets 或其他存儲機制以記錄新版本
           else
             echo "NEW_RELEASE_FOUND=false" >> $GITHUB_ENV
+          fi
 
       - name: Build and push Docker image
         if: env.NEW_RELEASE_FOUND == 'true'
