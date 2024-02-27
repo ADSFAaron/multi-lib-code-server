@@ -1,34 +1,43 @@
-name: Build and Push Docker Image with Latest Code-Server Version
+name: Update and Push Docker Image on New Code-Server Release
 
 on:
-  push:
-    branches:
-      - main # 或者您希望觸發此工作流程的分支
+  schedule:
+    - cron: '0 0 */7 * *'  # 每7天執行一次
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Get the latest code-server release tag
-        id: latest_release
-        run: |
-          LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | jq -r '.tag_name')
-          echo "LATEST_RELEASE_TAG=${LATEST_RELEASE_TAG}" >> $GITHUB_ENV
-          echo "::set-output name=tag::${LATEST_RELEASE_TAG}"
-      
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          build-args: CODE_SERVER_VERSION=${{ steps.latest_release.outputs.tag }}
-          push: true
-          tags: adsfaaron/vscode-server:${{ steps.latest_release.outputs.tag }}
+      - name: Get the latest code-server release tag
+        id: latest_release
+        run: |
+          LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | jq -r '.tag_name')
+          echo "LATEST_RELEASE_TAG=$LATEST_RELEASE_TAG"
+          echo "tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Check if new release is available
+        id: check_new_release
+        env:
+          PREVIOUS_RELEASE_TAG: ${{ secrets.PREVIOUS_RELEASE_TAG }} # 假設您將上一個版本存儲在了 Secrets 中
+        run: |
+          if [[ "${{ steps.latest_release.outputs.tag }}" != "$PREVIOUS_RELEASE_TAG" ]]; then
+            echo "NEW_RELEASE_FOUND=true" >> $GITHUB_ENV
+            echo "${{ steps.latest_release.outputs.tag }}" > VERSION
+            # 更新 GitHub Secrets 或其他存儲機制以記錄新版本
+          else
+            echo "NEW_RELEASE_FOUND=false" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        if: env.NEW_RELEASE_FOUND == 'true'
+        run: |
+          docker build . --file Dockerfile --tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
+          docker push adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
