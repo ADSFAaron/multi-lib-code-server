@@ -1,6 +1,9 @@
 name: Update and Push Docker Image on New Code-Server Release
 
 on:
+  push:
+    branches:
+      - main  # 或者是您想要自動觸發的分支
   schedule:
     - cron: '0 0 */7 * *'  # 每7天執行一次
 
