@@ -36,6 +36,10 @@ RUN mkdir /projects
 
 RUN df -h
 
+RUN docker system prune -f
+
+RUN free -m
+
 # Install pip library
 RUN pip install --no-cache-dir -U pip && \
   pip install --no-cache-dir --no-deps torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && \
