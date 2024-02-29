@@ -13,19 +13,16 @@ RUN apt-get update --fix-missing && DEBIAN_FRONTEND=noninteractive apt-get insta
   libx11-6 \
   locales \
   man \
-  nano \
   wget \
   git \
   procps \
   graphviz libgraphviz-dev \
-  openssh-client \
   vim.tiny \
   lsb-release \
-  python \
+  python3 \
   python3-pip \
   python3-opencv \
   build-essential \
-  g++ \
   apache2-utils \
   tree \
   && rm -rf /var/lib/apt/lists/*
@@ -37,29 +34,34 @@ ENV LANG=zh_TW.UTF-8
 # Create project directory
 RUN mkdir /projects
 
+RUN df -h
+
 # Install pip library
-RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir \
-    torch==1.13.0+cu116 torchvision==0.14.0+cu116 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu116 && \
-    pip install --no-cache-dir --no-deps torchtext==0.15.2 \
-    torchdata==0.6.1
+RUN pip install --no-cache-dir -U pip && \
+  pip install --no-cache-dir --no-deps torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && \
+  pip install --no-cache-dir --no-deps torchtext==0.15.2 torchdata==0.6.1
+
+RUN df -h
+
+RUN pip install --no-cache-dir typing-extensions pillow idna certifi urllib3 charset-normalizer
 
 RUN pip install --no-cache-dir tensorflow-gpu==2.10.1 keras==2.10.0 \
-    pytest==7.2.2 graphviz==0.19.1 pytensor
+  pytest==7.2.2 graphviz==0.19.1 pytensor
 
 RUN pip install --no-cache-dir plotly torchviz pandas pandas-datareader pandas-gbq \
-    beautifulsoup4 requests lxml requests-oauthlib \
-    scikit-learn scikit-image scipy sklearn-pandas \
-    seaborn matplotlib \
-    tables tornado tqdm wordcloud pip-tools pathlib networkx numpy LunarCalendar
+  beautifulsoup4 requests lxml requests-oauthlib \
+  scikit-learn scikit-image scipy sklearn-pandas \
+  seaborn matplotlib \
+  tables tornado tqdm wordcloud pip-tools pathlib networkx numpy LunarCalendar
 
 RUN pip install --no-cache-dir opencv-contrib-python opencv-python opencv-python-headless \
-    Markdown markdown-it-py MarkupSafe \
-    ipykernel ipython ipython-genutils ipywidgets ipython-sql \
-    imageio imageio-ffmpeg \
-    virtualenv flask protobuf==3.19.6
+  Markdown markdown-it-py MarkupSafe \
+  ipykernel ipython ipython-genutils ipywidgets ipython-sql \
+  imageio imageio-ffmpeg \
+  virtualenv flask protobuf==3.19.6
 
 RUN pip install --no-cache-dir yfinance zipp zict tokenizers scooby PyDrive2 huggingface-hub diskcache \
-    transformers 
+  transformers 
 
 RUN pip install --no-cache-dir --upgrade nvitop
 
@@ -78,10 +80,10 @@ RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixui
 
 # Install code-server
 WORKDIR /tmp
-ARG CODE_SERVER_VERSION=latest
-ENV CODE_SERVER_VERSION=${CODE_SERVER_VERSION}
+# ARG CODE_SERVER_VERSION=latest
+# ENV CODE_SERVER_VERSION=${CODE_SERVER_VERSION}
 # 使用 ENV 設定的版本來安裝 code-server
-# ENV CODE_SERVER_VERSION=4.20.0
+ENV CODE_SERVER_VERSION=4.21.1
 RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 RUN dpkg -i ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb && rm ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh

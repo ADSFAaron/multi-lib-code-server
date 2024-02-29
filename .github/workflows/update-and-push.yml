@@ -5,7 +5,7 @@ on:
     branches:
       - main  # 或者是您想要自動觸發的分支
   schedule:
-    - cron: '0 0 */7 * *'  # 每7天執行一次
+    - cron: '0 0 */1 * *'  # 每1天執行一次
 
 jobs:
   build-and-push:
