@@ -42,7 +42,7 @@ RUN free -m
 
 # Install pip library
 RUN pip install --no-cache-dir -U pip && \
-  pip install --no-cache-dir --no-deps torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && \
+  pip install --no-cache-dir torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && \
   pip install --no-cache-dir --no-deps torchtext==0.15.2 torchdata==0.6.1
 
 RUN df -h
@@ -87,7 +87,7 @@ WORKDIR /tmp
 ARG CODE_SERVER_VERSION=latest
 ENV CODE_SERVER_VERSION=${CODE_SERVER_VERSION}
 # 使用 ENV 設定的版本來安裝 code-server
-# ENV CODE_SERVER_VERSION=4.21.1
+# ENV CODE_SERVER_VERSION=4.21.2
 RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 RUN dpkg -i ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb && rm ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
