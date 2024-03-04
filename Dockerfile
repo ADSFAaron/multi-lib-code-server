@@ -85,7 +85,7 @@ RUN curl -fsSL "https://github.com/boxboat/fixuid/releases/download/v0.6.0/fixui
 # Install code-server
 WORKDIR /tmp
 ARG CODE_SERVER_VERSION=latest
-ENV CODE_SERVER_VERSION=${CODE_SERVER_VERSION}
+ENV CODE_SERVER_VERSION=${LATEST_RELEASE_TAG}
 # 使用 ENV 設定的版本來安裝 code-server
 # ENV CODE_SERVER_VERSION=4.21.2
 RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb

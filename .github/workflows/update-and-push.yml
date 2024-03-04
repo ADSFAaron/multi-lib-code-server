@@ -23,8 +23,6 @@ jobs:
       - name: Get the latest code-server release tag
         id: latest_release
         run: |
-          # df -h
-          # docker system df
           LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | jq -r '.tag_name')
           echo "LATEST_RELEASE_TAG=$LATEST_RELEASE_TAG"
           echo "tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
