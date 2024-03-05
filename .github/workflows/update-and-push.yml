@@ -24,6 +24,7 @@ jobs:
         id: latest_release
         run: |
           LATEST_RELEASE_TAG=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | jq -r '.tag_name')
+          LATEST_RELEASE_TAG=${LATEST_RELEASE_TAG#v}  # 移除前綴 v
           echo "LATEST_RELEASE_TAG=$LATEST_RELEASE_TAG"
           echo "tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
 
