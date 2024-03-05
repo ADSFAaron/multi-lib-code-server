@@ -43,5 +43,5 @@ jobs:
       - name: Build and push Docker image
         if: env.NEW_RELEASE_FOUND == 'true'
         run: |
-          docker build . --file Dockerfile --tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
+          docker build . --file Dockerfile --tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }} --build-arg CODE_SERVER_VERSION=${{ env.LATEST_RELEASE_TAG }}
           docker push adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
