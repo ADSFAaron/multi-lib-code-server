@@ -87,8 +87,8 @@ WORKDIR /tmp
 ARG CODE_SERVER_VERSION=latest
 ENV CODE_SERVER_VERSION=${LATEST_RELEASE_TAG}
 # 使用 ENV 設定的版本來安裝 code-server
-# ENV CODE_SERVER_VERSION=4.21.2
-RUN curl -fOL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
+# ENV CODE_SERVER_VERSION=v4.21.2
+RUN curl -fOL https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 RUN dpkg -i ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb && rm ./code-server_${CODE_SERVER_VERSION}_${ARCH}.deb
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 
