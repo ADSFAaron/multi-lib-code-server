@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:12.3.2-cudnn9-devel-ubuntu22.04
 
 # Install dependencies
 RUN apt-get update --fix-missing && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -36,21 +36,21 @@ RUN mkdir /projects
 
 RUN apt-get clean
 
-RUN df -h
-
 RUN free -m
 
 # Install pip library
-RUN pip install --no-cache-dir -U pip && \
-  pip install --no-cache-dir torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && \
-  pip install --no-cache-dir --no-deps torchtext==0.15.2 torchdata==0.6.1
+COPY requirements.txt /tmp/requirements.txt
+
+WORKDIR /tmp
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN df -h
 
 RUN pip install --no-cache-dir typing-extensions pillow idna certifi urllib3 charset-normalizer
 
-RUN pip install --no-cache-dir tensorflow-gpu==2.10.1 keras==2.10.0 \
-  pytest==7.2.2 graphviz==0.19.1 pytensor
+RUN pip install --no-cache-dir tensorflow==2.16.1 \
+  pytest graphviz pytensor
 
 RUN pip install --no-cache-dir plotly torchviz pandas pandas-datareader pandas-gbq \
   beautifulsoup4 requests lxml requests-oauthlib \
@@ -62,12 +62,12 @@ RUN pip install --no-cache-dir opencv-contrib-python opencv-python opencv-python
   Markdown markdown-it-py MarkupSafe \
   ipykernel ipython ipython-genutils ipywidgets ipython-sql \
   imageio imageio-ffmpeg \
-  virtualenv flask protobuf==3.19.6
+  virtualenv flask protobuf
 
 RUN pip install --no-cache-dir yfinance zipp zict tokenizers scooby PyDrive2 huggingface-hub diskcache \
-  transformers  timm==0.5.4 moviepy
+  transformers timm==0.5.4 moviepy
 
-RUN pip install --no-cache-dir --upgrade nvitop
+RUN pip install --no-cache-dir --upgrade nvitop 
 
 # Create a non-root user
 RUN adduser --disabled-password --gecos '' --shell /bin/bash coder \
