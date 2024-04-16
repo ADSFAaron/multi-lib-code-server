@@ -65,7 +65,7 @@ RUN pip install --no-cache-dir opencv-contrib-python opencv-python opencv-python
   virtualenv flask protobuf==3.19.6
 
 RUN pip install --no-cache-dir yfinance zipp zict tokenizers scooby PyDrive2 huggingface-hub diskcache \
-  transformers  timm==0.5.4 moviepy
+  transformers timm==0.5.4 moviepy
 
 RUN pip install --no-cache-dir --upgrade nvitop
 

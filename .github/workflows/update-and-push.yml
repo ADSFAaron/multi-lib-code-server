@@ -3,9 +3,9 @@ name: Update and Push Docker Image on New Code-Server Release
 on:
   push:
     branches:
-      - main  # 或者是您想要自動觸發的分支
+      - main
   schedule:
-    - cron: '0 0 */1 * *'  # 每1天執行一次
+    - cron: '0 0 */1 * *'  # 每天執行一次
 
 jobs:
   build-and-push:
@@ -31,7 +31,7 @@ jobs:
       - name: Check if new release is available
         id: check_new_release
         env:
-          PREVIOUS_RELEASE_TAG: ${{ secrets.PREVIOUS_RELEASE_TAG }} # 假設您將上一個版本存儲在了 Secrets 中
+          PREVIOUS_RELEASE_TAG: ${{ secrets.PREVIOUS_RELEASE_TAG }}  # 假設您將上一個版本存儲在了 Secrets 中
         run: |
           if [[ "${{ steps.latest_release.outputs.tag }}" != "$PREVIOUS_RELEASE_TAG" ]]; then
             echo "NEW_RELEASE_FOUND=true" >> $GITHUB_ENV
@@ -39,10 +39,12 @@ jobs:
             # 更新 GitHub Secrets 或其他存儲機制以記錄新版本
           else
             echo "NEW_RELEASE_FOUND=false" >> $GITHUB_ENV
-          fi
 
       - name: Build and push Docker image
-        if: env.NEW_RELEASE_FOUND == 'true'
+        if: ${{ env.NEW_RELEASE_FOUND == 'true' }}
         run: |
           docker build . --file Dockerfile --tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }} --build-arg CODE_SERVER_VERSION=${{ steps.latest_release.outputs.tag }}
           docker push adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
+          # Tag and push as latest
+          docker tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }} adsfaaron/vscode-server-gpu:latest
+          docker push adsfaaron/vscode-server-gpu:latest
