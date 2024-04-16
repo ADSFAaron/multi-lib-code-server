@@ -28,20 +28,38 @@ jobs:
           echo "LATEST_RELEASE_TAG=$LATEST_RELEASE_TAG"
           echo "tag=$LATEST_RELEASE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Check if new release is available
-        id: check_new_release
-        env:
-          PREVIOUS_RELEASE_TAG: ${{ secrets.PREVIOUS_RELEASE_TAG }}  # 假設您將上一個版本存儲在了 Secrets 中
+      # - name: Check if new release is available
+      #   id: check_new_release
+      #   env:
+      #     PREVIOUS_RELEASE_TAG: ${{ secrets.PREVIOUS_RELEASE_TAG }}  # 假設您將上一個版本存儲在了 Secrets 中
+      #   run: |
+      #     if [[ "${{ steps.latest_release.outputs.tag }}" != "$PREVIOUS_RELEASE_TAG" ]]; then
+      #       echo "NEW_RELEASE_FOUND=true" >> $GITHUB_ENV
+      #       echo "${{ steps.latest_release.outputs.tag }}" > VERSION
+      #       # 更新 GitHub Secrets 或其他存儲機制以記錄新版本
+      #     else
+      #       echo "NEW_RELEASE_FOUND=false" >> $GITHUB_ENV
+
+      - name: Get the latest code-server release time
+        id: latest_release_time
         run: |
-          if [[ "${{ steps.latest_release.outputs.tag }}" != "$PREVIOUS_RELEASE_TAG" ]]; then
-            echo "NEW_RELEASE_FOUND=true" >> $GITHUB_ENV
-            echo "${{ steps.latest_release.outputs.tag }}" > VERSION
-            # 更新 GitHub Secrets 或其他存儲機制以記錄新版本
+          release_time=$(curl -s https://api.github.com/repos/coder/code-server/releases/latest | jq -r '.published_at')
+          echo "RELEASE_TIME=$release_time" >> $GITHUB_ENV
+
+      - name: Check if new release was published within the last 24 hours
+        id: check_release_time
+        run: |
+          release_time=$(date -u -d "${{ env.RELEASE_TIME }}" +%s)
+          current_time=$(date -u +%s)
+          diff=$((current_time - release_time))
+          echo "Time difference in seconds: $diff"
+          if [ $diff -le 86400 ]; then
+            echo "NEW_RELEASE_RECENT=true" >> $GITHUB_ENV
           else
-            echo "NEW_RELEASE_FOUND=false" >> $GITHUB_ENV
+            echo "NEW_RELEASE_RECENT=false" >> $GITHUB_ENV
 
       - name: Build and push Docker image
-        if: ${{ env.NEW_RELEASE_FOUND == 'true' }}
+        if: env.NEW_RELEASE_RECENT == 'true'
         run: |
           docker build . --file Dockerfile --tag adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }} --build-arg CODE_SERVER_VERSION=${{ steps.latest_release.outputs.tag }}
           docker push adsfaaron/vscode-server-gpu:${{ steps.latest_release.outputs.tag }}
