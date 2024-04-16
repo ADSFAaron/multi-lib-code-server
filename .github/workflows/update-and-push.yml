@@ -53,10 +53,15 @@ jobs:
           current_time=$(date -u +%s)
           diff=$((current_time - release_time))
           echo "Time difference in seconds: $diff"
+          echo "Current time in seconds: $current_time"
+
+          # Check if the release is recent (within 24 hours)
           if [ $diff -le 86400 ]; then
             echo "NEW_RELEASE_RECENT=true" >> $GITHUB_ENV
           else
             echo "NEW_RELEASE_RECENT=false" >> $GITHUB_ENV
+          fi
+            
 
       - name: Build and push Docker image
         if: env.NEW_RELEASE_RECENT == 'true'
