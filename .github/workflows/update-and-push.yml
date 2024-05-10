@@ -73,7 +73,7 @@ jobs:
           docker push adsfaaron/vscode-server-gpu:latest
 
           # Build Docker image with Dockerfile.cuda12
-          docker build . --file Dockerfile.cuda12 --tag adsfaaron/vscode-server-gpu-cuda12:${{ steps.latest_release.outputs.tag }}
+          docker build . --file Dockerfile.cuda12 --tag adsfaaron/vscode-server-gpu-cuda12:${{ steps.latest_release.outputs.tag }} --build-arg CODE_SERVER_VERSION=${{ steps.latest_release.outputs.tag }}
 
           # Push the CUDA 12 image to Docker Hub
           docker push adsfaaron/vscode-server-gpu-cuda12:${{ steps.latest_release.outputs.tag }}
